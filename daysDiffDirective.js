@@ -230,8 +230,6 @@
                         $scope.$watch("ddTranslation", function (newValues, oldValues) {
 
                             // if there are no values, use default
-                            if (!newValues.ago) { newValues.ago = "ago" }
-                            if (!newValues.after) { newValues.after = "after" }
                             if (!newValues.and) { newValues.and = "and" }
                             if (!newValues.year) { newValues.year = "year" }
                             if (!newValues.years) { newValues.years = "years" }
