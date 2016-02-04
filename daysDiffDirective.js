@@ -91,6 +91,29 @@
                         // set up 
                         var intervalObj;
                         var shouldUpdateLiveDate;
+                        // set defaults
+                        var defaultAmountOfUnits = 3;
+                        var defaultTrans = {
+                            and: "and",
+                            year: "year",
+                            years: "years",
+                            month: "month",
+                            months: "months",
+                            week: "week",
+                            weeks: "weeks",
+                            day: "day",
+                            days: "days",
+                            hour: "hour",
+                            hours: "hours",
+                            minute: "minute",
+                            minutes: "minutes",
+                            second: "second",
+                            seconds: "seconds",
+                            moments: "moments"
+                        };
+                        // set starting values
+                        $scope.innerAmountOfUnits = defaultAmountOfUnits;
+                        $scope.innerTrans = angular.copy(defaultTrans);
 
                         var trimDateSinceObj = function (dateSince, amountOfUnits) {
                             var trimmedSince = [];
@@ -221,7 +244,7 @@
                                     }
                                 }
                             } else {
-                                $scope.innerAmountOfUnits = 3; // default value
+                                $scope.innerAmountOfUnits = defaultAmountOfUnits; // default value
                                 shouldUpdateLiveDate = true;
                             }
 
@@ -230,22 +253,12 @@
                         $scope.$watch("ddTranslation", function (newValues, oldValues) {
                             var translation = angular.copy(newValues);
                             // if there are no values, use default
-                            if (!translation.and) { translation.and = "and" }
-                            if (!translation.year) { translation.year = "year" }
-                            if (!translation.years) { translation.years = "years" }
-                            if (!translation.month) { translation.month = "month" }
-                            if (!translation.months) { translation.months = "months" }
-                            if (!translation.week) { translation.week = "week" }
-                            if (!translation.weeks) { translation.weeks = "weeks" }
-                            if (!translation.day) { translation.day = "day" }
-                            if (!translation.days) { translation.days = "days" }
-                            if (!translation.hour) { translation.hour = "hour" }
-                            if (!translation.hours) { translation.hours = "hours" }
-                            if (!translation.minute) { translation.minute = "minute" }
-                            if (!translation.minutes) { translation.minutes = "minutes" }
-                            if (!translation.second) { translation.second = "second" }
-                            if (!translation.seconds) { translation.seconds = "seconds" }
-                            if (!translation.moments) { translation.moments = "moments" }
+                            angular.forEach(defaultTrans, function (value, key) {
+                                if (!translation[key]) {
+                                    translation[key] = value;
+                                };
+                            });
+                            
                             $scope.innerTrans = translation;
 
                         }, true);
