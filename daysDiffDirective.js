@@ -154,7 +154,7 @@
                                     throw new Error("days-diff element needs dd-from and/or dd-to on the same element");
                                 }
                             }
-                        });
+                        }, true);
 
                         $scope.$watch("ddTo", function (newValues, oldValues) {
                             if (newValues) {
@@ -195,7 +195,7 @@
                                     throw new Error("days-diff element needs dd-from and/or dd-to on the same element");
                                 }
                             }
-                        });
+                        }, true);
 
                         $scope.$watch("ddAmountOfUnits", function (newValues, oldValues) {
                             if (newValues) {
@@ -225,30 +225,30 @@
                                 shouldUpdateLiveDate = true;
                             }
 
-                        });
+                        }, true);
 
                         $scope.$watch("ddTranslation", function (newValues, oldValues) {
-
+                            var translation = angular.copy(newValues);
                             // if there are no values, use default
-                            if (!newValues.and) { newValues.and = "and" }
-                            if (!newValues.year) { newValues.year = "year" }
-                            if (!newValues.years) { newValues.years = "years" }
-                            if (!newValues.month) { newValues.month = "month" }
-                            if (!newValues.months) { newValues.months = "months" }
-                            if (!newValues.week) { newValues.week = "week" }
-                            if (!newValues.weeks) { newValues.weeks = "weeks" }
-                            if (!newValues.day) { newValues.day = "day" }
-                            if (!newValues.days) { newValues.days = "days" }
-                            if (!newValues.hour) { newValues.hour = "hour" }
-                            if (!newValues.hours) { newValues.hours = "hours" }
-                            if (!newValues.minute) { newValues.minute = "minute" }
-                            if (!newValues.minutes) { newValues.minutes = "minutes" }
-                            if (!newValues.second) { newValues.second = "second" }
-                            if (!newValues.seconds) { newValues.seconds = "seconds" }
-                            if (!newValues.moments) { newValues.moments = "moments" }
-                            $scope.innerTrans = newValues;
+                            if (!translation.and) { translation.and = "and" }
+                            if (!translation.year) { translation.year = "year" }
+                            if (!translation.years) { translation.years = "years" }
+                            if (!translation.month) { translation.month = "month" }
+                            if (!translation.months) { translation.months = "months" }
+                            if (!translation.week) { translation.week = "week" }
+                            if (!translation.weeks) { translation.weeks = "weeks" }
+                            if (!translation.day) { translation.day = "day" }
+                            if (!translation.days) { translation.days = "days" }
+                            if (!translation.hour) { translation.hour = "hour" }
+                            if (!translation.hours) { translation.hours = "hours" }
+                            if (!translation.minute) { translation.minute = "minute" }
+                            if (!translation.minutes) { translation.minutes = "minutes" }
+                            if (!translation.second) { translation.second = "second" }
+                            if (!translation.seconds) { translation.seconds = "seconds" }
+                            if (!translation.moments) { translation.moments = "moments" }
+                            $scope.innerTrans = translation;
 
-                        });
+                        }, true);
                         var startLiveDate = function () {
                             if (!$scope.ddTo || !$scope.ddFrom) {
                                 if (intervalObj) {
@@ -299,7 +299,7 @@
                                     shouldUpdateLiveDate = false;
                                 }
                             }
-                        });
+                        }, true);
 
                     };
                 }
