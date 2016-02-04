@@ -65,6 +65,7 @@
     "<span ng-if=\"!$last && !((dateUnits.length - $index) === 2)\" ng-bind=\"', '\"></span>" +
     "<span ng-if=\"(dateUnits.length - $index) === 2\" ng-bind=\"' ' + innerTrans.and + ' '\"></span>" +
 "</span>" +
+"<span ng-if=\"unit.key === 'moments'\" ng-bind=\"innerTrans.moments\"></span>" +
 "</span>" +
 "</div>";
 
@@ -104,11 +105,18 @@
                         };
                         var refreshUI = function () {
                             $scope.dateUnits = trimDateSinceObj(dateDiff($scope.innerDdFrom, $scope.innerDdTo), $scope.innerAmountOfUnits);
+                            if ($scope.dateUnits.length === 0) {
+                                $scope.dateUnits.push({ key: "moments", value: 0, timeInMilli: 0 });
+                            }
                         };
+                        var stop = function () {
+                            $interval.cancel(intervalObj);
+                            $scope.dateUnits = null;
+                        }
+
                         // cleanup on element destroy event
                         $element.on("$destroy", function () {
-
-                            $interval.cancel(intervalObj);
+                            stop();
                         });
 
                         $scope.$watch("ddFrom", function (newValues, oldValues) {
@@ -123,16 +131,27 @@
                                     $interval.cancel(intervalObj);
                                 }
                                 // check for date
-                                if (angular.isDate($scope.ddFrom)) {
-                                    $scope.innerDdFrom = $scope.ddFrom;
+                                if (angular.isDate(newValues)) {
+                                    $scope.innerDdFrom = newValues;
                                 } else {
-                                    throw "dd-from is not a date object" + $scope.ddFrom;
+                                    throw new Error("dd-from is not a date object", newValues);
                                 }
                                 if (!$scope.ddTo) {
                                     // since no ddTo is defined, assume user wants
                                     // to use today
                                     $scope.innerDdTo = new Date();
                                     shouldUpdateLiveDate = true;
+                                }
+                            } else {
+                                // if ddTo is set to undefined, but there is ddFrom
+                                if ($scope.ddTo) {
+                                    // since no ddTo is defined, assume user wants
+                                    // to use today
+                                    $scope.innerDdFrom = new Date();
+                                    shouldUpdateLiveDate = true;
+                                } else {
+                                    stop();
+                                    throw new Error("days-diff element needs dd-from and/or dd-to on the same element");
                                 }
                             }
                         });
@@ -149,16 +168,31 @@
                                     $interval.cancel(intervalObj);
                                 }
                                 // check for date
-                                if (angular.isDate($scope.ddTo)) {
-                                    $scope.innerDdTo = $scope.ddTo;
+                                if (angular.isDate(newValues)) {
+                                    $scope.innerDdTo = newValues;
                                 } else {
-                                    throw "dd-from is not a date object " + $scope.ddTo;
+                                    stop();
+                                    throw new Error("dd-from is not a date object " + newValues);
                                 }
                                 if (!$scope.ddFrom) {
                                     // since no ddFrom is defined, assume user wants
                                     // to use today
                                     $scope.innerDdFrom = new Date();
                                     shouldUpdateLiveDate = true;
+                                }
+                            } else {
+
+                                // if ddTo is set to undefined, but there is ddFrom
+                                if ($scope.ddFrom) {
+
+                                    // since no ddTo is defined, assume user wants
+                                    // to use today
+                                    $scope.innerDdTo = new Date();
+                                    shouldUpdateLiveDate = true;
+
+                                } else {
+                                    stop();
+                                    throw new Error("days-diff element needs dd-from and/or dd-to on the same element");
                                 }
                             }
                         });
@@ -167,51 +201,61 @@
                             if (newValues) {
                                 if (angular.isNumber($scope.ddAmountOfUnits)) {
                                     $scope.innerAmountOfUnits = $scope.ddAmountOfUnits;
-                                }
-                                else {
+                                    shouldUpdateLiveDate = true;
+                                } else {
                                     var int = parseInt($scope.ddAmountOfUnits);
                                     if (!isNaN(int)) {
                                         if (int > 7) {
-                                            throw "amount of units should not be bigger than 7 (1:yrs,2:mths,3:wks,4:dys,5:hrs,6:mins,7:secs), you set it to " + int;
+                                            stop();
+                                            throw new Error("amount of units should not be bigger than 7 (1:yrs,2:mths,3:wks,4:dys,5:hrs,6:mins,7:secs), you set it to " + int);
                                         } else if (int < 0) {
-                                            throw "amount of units should not be smaller than 7 (1:yrs,2:mths,3:wks,4:dys,5:hrs,6:mins,7:secs), you set it to " + int;
+                                            stop();
+                                            throw new Error("amount of units should not be smaller than 7 (1:yrs,2:mths,3:wks,4:dys,5:hrs,6:mins,7:secs), you set it to " + int);
                                         } else {
                                             $scope.innerAmountOfUnits = int;
+                                            shouldUpdateLiveDate = true;
                                         }
                                     } else {
-                                        throw "your ddAmountOfUnits is not a number: " + $scope.ddAmountOfUnits + " (parsed: " + int + ")";
+                                        stop();
+                                        throw new Error("your ddAmountOfUnits is not a number: " + $scope.ddAmountOfUnits + " (parsed: " + int + ")");
                                     }
                                 }
+                            } else {
+                                $scope.innerAmountOfUnits = 3; // default value
+                                shouldUpdateLiveDate = true;
                             }
 
                         });
 
                         $scope.$watch("ddTranslation", function (newValues, oldValues) {
-                            if (newValues) {
-                                // if there are no values, use default
-                                if (!newValues.ago) { newValues.ago = "ago" }
-                                if (!newValues.after) { newValues.after = "after" }
-                                if (!newValues.and) { newValues.and = "and" }
-                                if (!newValues.year) { newValues.year = "year" }
-                                if (!newValues.years) { newValues.years = "years" }
-                                if (!newValues.month) { newValues.month = "month" }
-                                if (!newValues.months) { newValues.months = "months" }
-                                if (!newValues.week) { newValues.week = "week" }
-                                if (!newValues.weeks) { newValues.weeks = "weeks" }
-                                if (!newValues.day) { newValues.day = "day" }
-                                if (!newValues.days) { newValues.days = "days" }
-                                if (!newValues.hour) { newValues.hour = "hour" }
-                                if (!newValues.hours) { newValues.hours = "hours" }
-                                if (!newValues.minute) { newValues.minute = "minute" }
-                                if (!newValues.minutes) { newValues.minutes = "minutes" }
-                                if (!newValues.second) { newValues.second = "second" }
-                                if (!newValues.seconds) { newValues.seconds = "seconds" }
-                                if (!newValues.moments) { newValues.moments = "moments" }
-                                $scope.innerTrans = newValues;
-                            }
+
+                            // if there are no values, use default
+                            if (!newValues.ago) { newValues.ago = "ago" }
+                            if (!newValues.after) { newValues.after = "after" }
+                            if (!newValues.and) { newValues.and = "and" }
+                            if (!newValues.year) { newValues.year = "year" }
+                            if (!newValues.years) { newValues.years = "years" }
+                            if (!newValues.month) { newValues.month = "month" }
+                            if (!newValues.months) { newValues.months = "months" }
+                            if (!newValues.week) { newValues.week = "week" }
+                            if (!newValues.weeks) { newValues.weeks = "weeks" }
+                            if (!newValues.day) { newValues.day = "day" }
+                            if (!newValues.days) { newValues.days = "days" }
+                            if (!newValues.hour) { newValues.hour = "hour" }
+                            if (!newValues.hours) { newValues.hours = "hours" }
+                            if (!newValues.minute) { newValues.minute = "minute" }
+                            if (!newValues.minutes) { newValues.minutes = "minutes" }
+                            if (!newValues.second) { newValues.second = "second" }
+                            if (!newValues.seconds) { newValues.seconds = "seconds" }
+                            if (!newValues.moments) { newValues.moments = "moments" }
+                            $scope.innerTrans = newValues;
+
                         });
                         var startLiveDate = function () {
                             if (!$scope.ddTo || !$scope.ddFrom) {
+                                if (intervalObj) {
+                                    $interval.cancel(intervalObj);
+                                }
                                 var trimmedDateSince = trimDateSinceObj(dateDiff($scope.innerDdFrom, $scope.innerDdTo), $scope.innerAmountOfUnits);
                                 var lastSignificantDateSince = trimmedDateSince[trimmedDateSince.length - 1];
                                 if (!lastSignificantDateSince) {
@@ -228,7 +272,11 @@
                                     }, 1000);
                                     return;
                                 }
-                                if (!$scope.ddTo) {
+                                if (!$scope.ddTo && !$scope.ddFrom) {
+                                    stop();
+                                    throw new Error("days-diff element needs dd-from and/or dd-to on the same element");
+                                }
+                                else if (!$scope.ddTo) {
                                     // shoot an interval, which will refresh it every 
                                     // time the smallest shown element changes
                                     intervalObj = $interval(function () {
@@ -240,9 +288,6 @@
                                     intervalObj = $interval(function () {
                                         $scope.innerDdFrom = new Date();
                                     }, lastSignificantDateSince.timeInMilli);
-                                } // this will never be triggered
-                                else {
-                                    throw "days-diff element needs dd-from and/or dd-to on the same element";
                                 }
                             }
                         }
