@@ -1,3 +1,10 @@
+### Archivation note [START]
+I wrote the stuff in this repository so long ago, I barely remember doing it.
+
+Since angularjs is dead, I don't plan on adding anything to it.
+
+### Archivation note [END]
+
 # daysDiffDirective
 an angular directive, which displays (as a string) the difference between any two javascript Date objects, or one Date object and this moment.
 
